@@ -16,10 +16,13 @@ from opentelemetry.exporter.otlp.proto.http.trace_exporter import (
 )
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.logging import LoggingInstrumentor
+from opentelemetry.instrumentation.langchain import LangchainInstrumentor
 from opentelemetry.propagate import inject
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from starlette.types import ASGIApp
+
+from services import ask_llm, ask_rag, ask_broken_rag, ask_legacy_rag
 
 EXPOSE_PORT = os.environ.get("EXPOSE_PORT", 8000)
 
@@ -63,6 +66,8 @@ def setting_jaeger(app: ASGIApp, log_correlation: bool = True) -> None:
     # override logger format which with trace id and span id
     if log_correlation:
         LoggingInstrumentor().instrument(set_logging_format=True)
+
+    LangchainInstrumentor().instrument(tracer_provider=tracer)
 
     FastAPIInstrumentor.instrument_app(app, tracer_provider=tracer)
 
@@ -142,6 +147,26 @@ async def chain(response: Response):
     logging.info("Chain Finished")
     return {"path": "/chain"}
 
+
+@app.post("/chat")
+def chat(question: str) -> dict[str, str]:
+    response = ask_llm(question)
+    return {"response": response}
+
+@app.post("/rag")
+def rag(question: str) -> dict[str, str]:
+    response = ask_rag(question)
+    return {"response": response}
+
+@app.post("/broken-rag")
+def broken_rag(question: str) -> dict[str, str]:
+    response = ask_broken_rag(question)
+    return {"response": response}
+
+@app.post("/legacy-rag")
+def legacy_rag(question: str) -> dict[str, str]:
+    response = ask_legacy_rag(question)
+    return {"response": response}
 
 if __name__ == "__main__":
     # update uvicorn access logger format
