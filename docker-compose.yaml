@@ -2,8 +2,8 @@ version: "3.4"
 
 services:
   app-a:
-    # build: ./fastapi_app/
-    image: ghcr.io/blueswen/fastapi-jaeger/app:latest
+    build: ./fastapi_app/
+    # image: ghcr.io/blueswen/fastapi-jaeger/app:latest
     ports:
       - "8000:8000"
     volumes:
@@ -16,8 +16,8 @@ services:
       TARGET_TWO_HOST: "app-c"
   
   app-b:
-    # build: ./fastapi_app/
-    image: ghcr.io/blueswen/fastapi-jaeger/app:latest
+    build: ./fastapi_app/
+    # image: ghcr.io/blueswen/fastapi-jaeger/app:latest
     ports:
       - "8001:8000"
     volumes:
@@ -30,8 +30,8 @@ services:
       TARGET_TWO_HOST: "app-c"
   
   app-c:
-    # build: ./fastapi_app/
-    image: ghcr.io/blueswen/fastapi-jaeger/app:latest
+    build: ./fastapi_app/
+    # image: ghcr.io/blueswen/fastapi-jaeger/app:latest
     ports:
       - "8002:8000"
     volumes:
